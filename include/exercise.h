@@ -4,12 +4,25 @@
 extern "C" {
 #endif
 
-typedef struct {
-  size_t length;
-  char buffer[64];
-} TextBuffer;
+typedef enum SnekObjectKind {
+  INTEGER,
+  STRING
+} snek_object_kind_t;
 
-int smart_append(TextBuffer* dest, const char* src);
+typedef union SnekObjectData {
+  int v_int;
+  char *v_string;
+} snek_object_data_t;
+
+typedef struct SnekObject {
+  snek_object_kind_t kind;
+  snek_object_data_t data;
+} snek_object_t;
+
+snek_object_t new_integer(int);
+snek_object_t new_string(char *str);
+void format_object(snek_object_t obj, char *buffer);
+
 
 #ifdef __cplusplus
 }

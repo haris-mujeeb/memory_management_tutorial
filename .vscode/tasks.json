@@ -20,7 +20,7 @@
             "command": "bash",
             "args": [
                 "-c",
-                "cmake --build . && ./memory_management_tutorial"
+                "cmake --build . && ./bin/memory_management_tutorial"
             ],
             "group": {
                 "kind": "test",

@@ -1,14 +1,16 @@
-#ifndef EXERCISE_H
-#define EXERCISE_H
+#include <string.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void concat_strings(char *dest, const char *src);
+typedef struct {
+  size_t length;
+  char buffer[64];
+} TextBuffer;
+
+int smart_append(TextBuffer* dest, const char* src);
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif // EXERCISE_H

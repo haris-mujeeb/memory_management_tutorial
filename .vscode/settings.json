@@ -1,0 +1,8 @@
+{
+  "files.associations": {
+    "*.tpp": "cpp",
+    "munit.h": "c",
+    "string.h": "c",
+    "exercise.h": "c"
+  }
+}

@@ -1,0 +1,82 @@
+# Build artifacts
+build/
+bin/
+*.o
+*.d
+*.obj
+*.exe
+*.dll
+*.lib
+*.so
+*.a
+memory_management_tutorial
+
+# CMake files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+_deps/
+CTestTestfile.cmake
+Makefile
+
+# VS Code files
+.vscode/*.log
+.vscode/*.bak
+.vscode/.easycpp
+.vscode/*.code-workspace
+
+# Editor/IDE specific files
+.idea/
+*.iml
+*.ipr
+*.iws
+*.suo
+*.user
+*.vcproj.user
+*.sdf
+*.opensdf
+*.opendb
+*.tlog
+*.aps
+*.bsc
+*.ncb
+*.sbr
+*.res
+*.pch
+*.idb
+*.opt
+*.plg
+*.manifest
+*.filters
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.sln
+*.vshost.exe
+*.vspscc
+*.vssscc
+*.bak
+*.log
+*.pid
+*.seed
+*.swp
+*~
+.#*
+
+# macOS specific files
+.DS_Store
+
+# Linux specific files
+*~
+
+# Package manager directories
+conan/
+vcpkg/
+
+# Crash dumps
+*.dmp
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp

@@ -1,50 +1,55 @@
 #include "gtest/gtest.h"
 #include "exercise.h"
 #include <string.h>
+#include <stdbool.h>
+#include <stdint.h> // Required for uintptr_t
 
-// Group all tests for the format_object function under the Test Suite "FormatObjectTest"
+// --- Helper function from original Munit test ---
+// NOTE: This function relies on GCC built-ins and may not be portable.
+// It is kept here to maintain the functionality of the original test.
+bool is_on_stack(void *ptr) {
+  void *stack_top = __builtin_frame_address(0);
+  uintptr_t stack_top_addr = (uintptr_t)stack_top;
+  uintptr_t ptr_addr = (uintptr_t)ptr;
 
-TEST(FormatObjectTest, FormatsInt1) {
-  char buffer[100];
-  // Assuming new_integer creates and returns a snek_object_t
-  snek_object_t i = new_integer(5);
-  format_object(i, buffer);
+  // Check within a threshold in both directions (e.g., 1KB)
+  uintptr_t threshold = 1024;
 
-  // Munit: assert_string_equal("int:5", buffer, "formats INTEGER");
-  // GTest: ASSERT_STREQ(expected, actual)
-  ASSERT_STREQ("int:5", buffer);
+  return ptr_addr >= (stack_top_addr - threshold) && ptr_addr <= (stack_top_addr + threshold);
+}
+// ------------------------------------------------
+
+// Group all tests for get_full_greeting under the Test Suite "GreetingTest"
+
+TEST(GreetingTest, BasicGreeting) {
+  // get_full_greeting(prefix, name, buffer_size)
+  char *result = get_full_greeting("Hello", "Alice", 20);
+
+  // Checks the expected full greeting
+  ASSERT_STREQ("Hello Alice", result);
+  
+  // Checks that the result buffer was dynamically allocated (not on the stack)
+  ASSERT_FALSE(is_on_stack(result));
+
+  // Cleans up the dynamically allocated memory
+  free(result);
 }
 
-TEST(FormatObjectTest, FormatsString1) {
-  char buffer[100];
-  // Assuming new_string creates and returns a snek_object_t
-  snek_object_t s = new_string("Hello!");
-  format_object(s, buffer);
+TEST(GreetingTest, ShortBuffer) {
+  // get_full_greeting(prefix, name, buffer_size)
+  // The full string "Hey Bob" (7 chars + null terminator = 8 needed) won't fit in size 4.
+  char *result = get_full_greeting("Hey", "Bob", 4);
 
-  // Munit: assert_string_equal("string:Hello!", buffer, "formats STRING");
-  // GTest: ASSERT_STREQ(expected, actual)
-  ASSERT_STREQ("string:Hello!", buffer);
+  // Checks that the string is truncated to fit the requested buffer size
+  ASSERT_STREQ("Hey", result);
+  
+  // Checks that the result buffer was dynamically allocated
+  ASSERT_FALSE(is_on_stack(result));
+
+  // Cleans up the dynamically allocated memory
+  free(result);
 }
 
-TEST(FormatObjectTest, FormatsInt2) {
-  char buffer[100];
-  snek_object_t i = new_integer(2014);
-  format_object(i, buffer);
-
-  // Munit: assert_string_equal("int:2014", buffer, "formats INTEGER");
-  // GTest: ASSERT_STREQ(expected, actual)
-  ASSERT_STREQ("int:2014", buffer);
-}
-
-TEST(FormatObjectTest, FormatsString2) {
-  char buffer[100];
-  snek_object_t s = new_string("nvim btw");
-  format_object(s, buffer);
-
-  // Munit: assert_string_equal("string:nvim btw", buffer, "formats STRING");
-  // GTest: ASSERT_STREQ(expected, actual)
-  ASSERT_STREQ("string:nvim btw", buffer);
-}
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

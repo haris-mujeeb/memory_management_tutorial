@@ -3,6 +3,7 @@
     "*.tpp": "cpp",
     "munit.h": "c",
     "string.h": "c",
-    "exercise.h": "c"
+    "exercise.h": "c",
+    "stdio.h": "c"
   }
 }

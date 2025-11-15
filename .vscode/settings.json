@@ -4,6 +4,7 @@
     "munit.h": "c",
     "string.h": "c",
     "exercise.h": "c",
-    "stdio.h": "c"
+    "stdio.h": "c",
+    "stdlib.h": "c"
   }
 }

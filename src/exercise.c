@@ -1,20 +1,11 @@
-#include "exercise.h"
+#include <stdlib.h>
+#include <string.h>
 
-void snek_zero_out(void *ptr, snek_object_kind_t kind) 
-{
-  switch (kind)
-  {
-  case INTEGER:
-    ((snek_int_t*)ptr)->value = 0;
-    break;
-  case FLOAT:
-    ((snek_float_t*)ptr)->value = 0.0;
-    break;
-  case BOOL:
-    ((snek_bool_t*)ptr)->value = 0;
-    break;
-  default:
-    break;
-  }
+void swap(void *vp1, void *vp2, size_t size) {
+  void *tmp = malloc(size);
+  if (tmp == NULL) return;  
+  memcpy(tmp, vp1, size);
+  memcpy(vp1, vp2, size);
+  memcpy(vp2, tmp, size);
+  free(tmp);
 }
- 

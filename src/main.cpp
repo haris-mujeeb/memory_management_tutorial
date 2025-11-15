@@ -1,56 +1,62 @@
-#include "gtest/gtest.h"
-#include "exercise.h"
+#include "gtest/gtest.h" // Replaces munit.h
+#include "bootlib.h"    // Kept for boot_all_freed()
+#include "exercise.h"    // Kept for the swap() function
+#include <stdint.h>      // Kept for uint64_t
 
-// Group all tests for the snek_zero_out function under the Test Suite "SnekZeroOutTest"
+// Struct definition from the original test file
+typedef struct CoffeeShop {
+  uint64_t quality;
+  uint64_t taste;
+  uint64_t branding;
+} coffee_shop_t;
 
-TEST(SnekZeroOutTest, ZeroOutInteger) {
-  snek_int_t integer;
-  integer.value = 42;
-  snek_zero_out(&integer, INTEGER);
-  
-  // Munit: munit_assert_int(integer.value, ==, 0, ...);
+// Group all tests for the swap function under the Test Suite "SwapTest"
+
+TEST(SwapTest, GenericInts) {
+  int i1 = 1234;
+  int i2 = 5678;
+
+  swap(&i1, &i2, sizeof(int));
+
+  // Munit: assert_int(i1, ==, 5678, ...);
   // GTest: ASSERT_EQ(expected, actual)
-  ASSERT_EQ(0, integer.value);
-}
-
-TEST(SnekZeroOutTest, ZeroOutFloat) {
-  snek_float_t float_num;
-  float_num.value = 3.14;
-  snek_zero_out(&float_num, FLOAT);
+  ASSERT_EQ(5678, i1) << "i1 should be i2's original value";
+  ASSERT_EQ(1234, i2) << "i2 should be i1's original value";
   
-  // Munit: munit_assert_float(float_num.value, ==, 0.0, ...);
-  // GTest: ASSERT_FLOAT_EQ(expected, actual) for floating-point values
-  ASSERT_FLOAT_EQ(0.0, float_num.value);
+  // Munit: assert_true(boot_all_freed());
+  ASSERT_TRUE(boot_all_freed());
 }
 
-TEST(SnekZeroOutTest, ZeroOutBool) {
-  snek_bool_t boolean;
-  boolean.value = 1;
-  snek_zero_out(&boolean, BOOL);
+TEST(SwapTest, GenericStrings) {
+  // Note: This swaps the pointers, not the string content.
+  const char *s1 = "dax";
+  const char *s2 = "adam";
+
+  swap(&s1, &s2, sizeof(char *));
+
+  // Munit: assert_string_equal(s1, "adam", ...);
+  // GTest: ASSERT_STREQ(expected, actual)
+  ASSERT_STREQ("adam", s1) << "s1 should be s2's original value";
+  ASSERT_STREQ("dax", s2) << "s2 should be i1's original value";
   
-  // Munit: munit_assert_int(boolean.value, ==, 0, ...);
-  // GTest: ASSERT_EQ(expected, actual)
-  ASSERT_EQ(0, boolean.value);
+  ASSERT_TRUE(boot_all_freed());
 }
 
-TEST(SnekZeroOutTest, ZeroOutNonZeroValues) {
-  snek_int_t integer;
-  snek_float_t float_num;
-  snek_bool_t boolean;
+TEST(SwapTest, GenericStructs) {
+  coffee_shop_t sbucks = {2, 3, 4};
+  coffee_shop_t terminalshop = {10, 10, 10};
 
-  integer.value = -100;
-  float_num.value = -99.99;
-  boolean.value = 255;
+  swap(&sbucks, &terminalshop, sizeof(coffee_shop_t));
 
-  // Zero out all three types
-  snek_zero_out(&integer, INTEGER);
-  snek_zero_out(&float_num, FLOAT);
-  snek_zero_out(&boolean, BOOL);
+  // Check all members of the first struct
+  ASSERT_EQ(10, sbucks.quality) << "sbucks.quality should be terminalshop.quality";
+  ASSERT_EQ(10, sbucks.taste) << "sbucks.taste should be terminalshop.taste";
+  ASSERT_EQ(10, sbucks.branding) << "sbucks.branding should be terminalshop.branding";
 
-  // Check all three results in the same test
-  ASSERT_EQ(0, integer.value) << "Negative integer should be zeroed out to 0";
-  ASSERT_FLOAT_EQ(0.0, float_num.value) << "Negative float should be zeroed out to 0.0";
-  ASSERT_EQ(0, boolean.value) << "Non-zero boolean should be zeroed out to 0";
+  // Check all members of the second struct
+  ASSERT_EQ(2, terminalshop.quality) << "terminalshop.quality should be sbucks.quality";
+  ASSERT_EQ(3, terminalshop.taste) << "terminalshop.taste should be sbucks.taste";
+  ASSERT_EQ(4, terminalshop.branding) << "terminalshop.branding should be sbucks.branding";
 }
 
 int main(int argc, char **argv) {

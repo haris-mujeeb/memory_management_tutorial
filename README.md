@@ -1,6 +1,8 @@
 # Memory Management Tutorial
 
-This project is a C/C++ memory management tutorial, demonstrating basic memory allocation and deallocation concepts. It uses CMake for build system generation and includes Google Test for unit testing. The project is configured for development with VS Code, providing tasks for building and debugging.
+This repository serves as a collection of projects following memory management tutorials from [boot.dev](https://www.boot.dev/). Each project or exercise is contained within its own dedicated branch.
+
+The projects in this repository utilize CMake for build system generation and Google Test for comprehensive unit testing.
 
 ## Project Structure
 

@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 project(MemoryManagementTutorial C CXX)
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+
 include(FetchContent)
 
 FetchContent_Declare(
@@ -13,7 +15,8 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(memory_management_tutorial
     src/main.cpp
-    src/exercise.c
+    src/snekobject.c
+    # src/exercise.c
 )
 
 target_include_directories(memory_management_tutorial PRIVATE

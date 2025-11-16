@@ -3,6 +3,25 @@
     "*.tpp": "cpp",
     "munit.h": "c",
     "string.h": "c",
-    "exercise.h": "c"
+    "exercise.h": "c",
+    "stdio.h": "c",
+    "stdlib.h": "c",
+    "array": "c",
+    "chrono": "c",
+    "deque": "c",
+    "forward_list": "c",
+    "list": "c",
+    "string": "c",
+    "unordered_map": "c",
+    "unordered_set": "c",
+    "vector": "c",
+    "iterator": "c",
+    "string_view": "c",
+    "format": "c",
+    "span": "c",
+    "snekstack.h": "c",
+    "stddef.h": "c",
+    "bitset": "c",
+    "initializer_list": "c"
   }
 }

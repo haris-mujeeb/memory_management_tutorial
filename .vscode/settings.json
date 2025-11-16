@@ -20,6 +20,8 @@
     "format": "c",
     "span": "c",
     "snekstack.h": "c",
-    "stddef.h": "c"
+    "stddef.h": "c",
+    "bitset": "c",
+    "initializer_list": "c"
   }
 }

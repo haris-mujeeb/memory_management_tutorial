@@ -1,63 +1,93 @@
 #include "gtest/gtest.h" // Replaces munit.h
-#include "bootlib.h"    // Kept for boot_all_freed()
-#include "exercise.h"    // Kept for the swap() function
-#include <stdint.h>      // Kept for uint64_t
+#include "snekstack.h"   // Kept for stack functions and types
+#include <stdlib.h>      // For free()
 
-// Struct definition from the original test file
-typedef struct CoffeeShop {
-  uint64_t quality;
-  uint64_t taste;
-  uint64_t branding;
-} coffee_shop_t;
+// Group all stack tests under the "SnekStackTest" suite
 
-// Group all tests for the swap function under the Test Suite "SwapTest"
+TEST(SnekStackTest, CreateStack) {
+  snek_stack_t *s = stack_new(10);
+  ASSERT_NE(nullptr, s) << "Stack pointer should not be null";
 
-TEST(SwapTest, GenericInts) {
-  int i1 = 1234;
-  int i2 = 5678;
+  ASSERT_EQ(10, s->capacity) << "Sets capacity to 10";
+  ASSERT_EQ(0, s->count) << "No elements in the stack yet";
+  ASSERT_NE(nullptr, s->data) << "Allocates the stack data";
 
-  swap(&i1, &i2, sizeof(int));
+  stack_free(s);
+  // ASSERT_TRUE(boot_all_freed()); // Removed
+}
 
-  // Munit: assert_int(i1, ==, 5678, ...);
-  // GTest: ASSERT_EQ(expected, actual)
-  ASSERT_EQ(5678, i1) << "i1 should be i2's original value";
-  ASSERT_EQ(1234, i2) << "i2 should be i1's original value";
+TEST(SnekStackTest, PushStackAndResize) {
+  snek_stack_t *s = stack_new(2);
+  ASSERT_NE(nullptr, s) << "Must allocate a new stack";
+
+  ASSERT_EQ(2, s->capacity) << "Sets capacity to 2";
+  ASSERT_EQ(0, s->count) << "No elements in the stack yet";
+  ASSERT_NE(nullptr, s->data) << "Allocates the stack data";
+
+  int a = 1;
+
+  stack_push(s, &a);
+  stack_push(s, &a);
+
+  // Stack is full
+  ASSERT_EQ(2, s->capacity) << "Sets capacity to 2";
+  ASSERT_EQ(2, s->count) << "2 elements in the stack";
+
+  // This push should trigger a resize
+  stack_push(s, &a);
+  ASSERT_EQ(4, s->capacity) << "Capacity is doubled";
+  ASSERT_EQ(3, s->count) << "3 elements in the stack";
+
+  stack_free(s);
+  // ASSERT_TRUE(boot_all_freed()); // Removed
+}
+
+TEST(SnekStackTest, PopStack) {
+  snek_stack_t *s = stack_new(2);
+  ASSERT_NE(nullptr, s);
+
+  ASSERT_EQ(2, s->capacity) << "Sets capacity to 2";
+  ASSERT_EQ(0, s->count) << "No elements in the stack yet";
+  ASSERT_NE(nullptr, s->data);
+
+  int one = 1;
+  int two = 2;
+  int three = 3;
+
+  // Push 1, 2
+  stack_push(s, &one);
+  stack_push(s, &two);
+  ASSERT_EQ(2, s->capacity) << "Sets capacity to 2";
+  ASSERT_EQ(2, s->count) << "2 elements in the stack";
+
+  // Push 3 (triggers resize)
+  stack_push(s, &three);
+  ASSERT_EQ(4, s->capacity) << "Capacity is doubled";
+  ASSERT_EQ(3, s->count) << "3 elements in the stack";
+
+  // Pop 3
+  int *popped = (int*)stack_pop(s); // Assuming stack_pop returns void*
+  ASSERT_NE(nullptr, popped) << "Popped pointer should not be null";
+  ASSERT_EQ(three, *popped) << "Should pop the last element (3)";
+
+  // Pop 2
+  popped = (int*)stack_pop(s);
+  ASSERT_NE(nullptr, popped) << "Popped pointer should not be null";
+  ASSERT_EQ(two, *popped) << "Should pop the last element (2)";
+
+  // Pop 1
+  popped = (int*)stack_pop(s);
+  ASSERT_NE(nullptr, popped) << "Popped pointer should not be null";
+  ASSERT_EQ(one, *popped) << "Should pop the only remaining element (1)";
+
+  // Pop from empty stack
+  popped = (int*)stack_pop(s);
   
-  // Munit: assert_true(boot_all_freed());
-  ASSERT_TRUE(boot_all_freed());
+  ASSERT_EQ(nullptr, popped) << "No remaining elements";
+
+  stack_free(s);
 }
 
-TEST(SwapTest, GenericStrings) {
-  // Note: This swaps the pointers, not the string content.
-  const char *s1 = "dax";
-  const char *s2 = "adam";
-
-  swap(&s1, &s2, sizeof(char *));
-
-  // Munit: assert_string_equal(s1, "adam", ...);
-  // GTest: ASSERT_STREQ(expected, actual)
-  ASSERT_STREQ("adam", s1) << "s1 should be s2's original value";
-  ASSERT_STREQ("dax", s2) << "s2 should be i1's original value";
-  
-  ASSERT_TRUE(boot_all_freed());
-}
-
-TEST(SwapTest, GenericStructs) {
-  coffee_shop_t sbucks = {2, 3, 4};
-  coffee_shop_t terminalshop = {10, 10, 10};
-
-  swap(&sbucks, &terminalshop, sizeof(coffee_shop_t));
-
-  // Check all members of the first struct
-  ASSERT_EQ(10, sbucks.quality) << "sbucks.quality should be terminalshop.quality";
-  ASSERT_EQ(10, sbucks.taste) << "sbucks.taste should be terminalshop.taste";
-  ASSERT_EQ(10, sbucks.branding) << "sbucks.branding should be terminalshop.branding";
-
-  // Check all members of the second struct
-  ASSERT_EQ(2, terminalshop.quality) << "terminalshop.quality should be sbucks.quality";
-  ASSERT_EQ(3, terminalshop.taste) << "terminalshop.taste should be sbucks.taste";
-  ASSERT_EQ(4, terminalshop.branding) << "terminalshop.branding should be sbucks.branding";
-}
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

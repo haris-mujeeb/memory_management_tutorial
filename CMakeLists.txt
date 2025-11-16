@@ -15,8 +15,7 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(memory_management_tutorial
     src/main.cpp
-    src/exercise.c
-    src/bootlib.c
+    src/snekstack.c
 )
 
 target_include_directories(memory_management_tutorial PRIVATE

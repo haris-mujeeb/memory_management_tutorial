@@ -18,6 +18,8 @@
     "iterator": "c",
     "string_view": "c",
     "format": "c",
-    "span": "c"
+    "span": "c",
+    "snekstack.h": "c",
+    "stddef.h": "c"
   }
 }

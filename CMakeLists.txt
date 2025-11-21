@@ -16,7 +16,6 @@ FetchContent_MakeAvailable(googletest)
 add_executable(memory_management_tutorial
     src/main.cpp
     src/snekobject.c
-    # src/exercise.c
 )
 
 target_include_directories(memory_management_tutorial PRIVATE

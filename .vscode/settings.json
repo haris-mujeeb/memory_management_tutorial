@@ -22,6 +22,12 @@
     "snekstack.h": "c",
     "stddef.h": "c",
     "bitset": "c",
-    "initializer_list": "c"
+    "initializer_list": "c",
+    "vm.h": "c",
+    "stack.h": "c",
+    "hash_map": "c",
+    "hash_set": "c",
+    "mystack.h": "c",
+    "snekobject.h": "c"
   }
 }

@@ -1,38 +1,70 @@
 #include "gtest/gtest.h"
 #include "snekobject.h"
+#include "vm.h"
+#include "sneknew.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 
 // ============================================================
-// Reference Counting Cycle Tests
+// Mark and Sweep Tests
 // ============================================================
 
-TEST(RefCountTest, CircularReferenceLeak) {
-  snek_object_t *first = new_snek_array(1);
-  snek_object_t *second = new_snek_array(1);
-  // ref count: first = 1, second = 1
+class VMTest : public ::testing::Test {
+  protected:
+    vm_t *vm = nullptr;
 
-  snek_array_set(first, 0, second);
-  // ref count: first = 1, second = 2
-  snek_array_set(second, 0, first);
-  // ref count: first = 2, second = 2
-  
-  refcount_dec(first);
-  // ref count: first = 1, second = 2
-  refcount_dec(second);
-  // ref count: first = 1, second = 1
+    void SetUp() override {
+      vm = vm_new();
+    }
 
-  ASSERT_EQ(1, first->refcount) << "First array must be leaked (refcount > 0)";
-  ASSERT_EQ(1, second->refcount) << "Second array must be leaked (refcount > 0)";
+    void TearDown() override {
+      vm_free(vm);
+      vm = nullptr;
+    }
+};
 
-  // Manual cleanup is required here to avoid an actual leak in the test runner.
-  // This is technically cheating the refcounter logic being tested.
-  free(first->data.v_array.elements);
-  free(first);
-  free(second->data.v_array.elements);
-  free(second);
 
+TEST_F(VMTest, TestVMNew) {
+  ASSERT_EQ(vm->frames->capacity, 8) << "frames should have capacity 8";
+  ASSERT_EQ(vm->objects->capacity, 8) << "objects should have capacity 8";
 }
+
+
+TEST_F(VMTest, TestVMFree) {
+  // For a simple existence check:
+  ASSERT_NE(vm, nullptr);
+}
+
+
+TEST(VMFrameTest, TestVMNewFrame) {
+  vm_t *vm = vm_new();
+  ASSERT_NE(vm, nullptr);
+  
+  frame_t *frame = vm_new_frame(vm);
+  ASSERT_NE(frame->references, nullptr) << "frame->references must be allocated";
+  
+  ASSERT_EQ(frame->references->count, 0) << "references stack should start empty";
+  ASSERT_GT(frame->references->capacity, 0); // references stack must have capacity > 0
+  ASSERT_NE(frame->references->data, nullptr) << "references stack backing array must be allocated";
+  
+  vm_free(vm);
+}
+
+
+TEST(VMFrameTest, VMFreesFrames) {
+  vm_t *vm  = vm_new();
+  ASSERT_NE(nullptr, vm);
+  
+  vm_new_frame(vm);
+  
+  // Implicitly checks that vm_free correctly cleans up all allocated frames
+  vm_free(vm);
+
+  // Success relies on ASan/Valgrind when running the test executable.
+  SUCCEED();
+}
+
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

@@ -7,7 +7,7 @@
             "command": "cmake",
             "args": [
                 "--build",
-                "."
+                "build"
             ],
             "group": {
                 "kind": "build",
@@ -20,7 +20,7 @@
             "command": "bash",
             "args": [
                 "-c",
-                "cmake --build . && ./bin/memory_management_tutorial"
+                "cmake --build build && ./build/bin/memory_management_tutorial"
             ],
             "group": {
                 "kind": "test",
@@ -33,7 +33,7 @@
             "command": "bash",
             "args": [
                 "-c",
-                "cmake --build ."
+                "cmake --build build"
             ],
             "group": "build",
             "problemMatcher": [
@@ -46,7 +46,7 @@
             "command": "cmake",
             "args": [
                 "--build",
-                ".",
+                "build",
                 "--target",
                 "clean"
             ],

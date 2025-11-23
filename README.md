@@ -84,3 +84,52 @@ The `.vscode` directory contains configurations to enhance the development exper
     -   Go to the "Run and Debug" view (Ctrl+Shift+D).
     -   Select the "C++ Debug (gdb)" configuration.
     -   Click the green play button to start debugging. This will automatically build the project in debug mode and launch the debugger.
+
+## Mark and Sweep Garbage Collector
+
+This repository implements a basic Mark and Sweep garbage collector to manage `snek_object_t` instances within a virtual machine (`vm_t`). The garbage collector is invoked by `vm_collect_garbage(vm)` and operates in three main phases: Mark, Trace, and Sweep.
+
+### VM Structure for GC
+
+The `vm_t` structure, defined in `include/vm.h`, plays a central role in memory management. It contains two key stack-like structures:
+-   `my_stack_t *frames`: A stack of active `frame_t` instances. Each frame represents a call stack entry and holds references to `snek_object_t` instances (local variables, arguments) that are considered *roots* for garbage collection.
+-   `my_stack_t *objects`: A stack of all `snek_object_t` instances currently allocated and tracked by the VM. This is the pool from which garbage is collected.
+
+### Mark Phase (`mark` function)
+
+The `mark(vm_t *vm)` function identifies all objects directly reachable from the garbage collector's roots. In this implementation, the roots are considered to be all `snek_object_t` instances referenced by the currently active frames.
+
+1.  It iterates through each `frame_t` in `vm->frames`.
+2.  For each frame, it iterates through all `snek_object_t` pointers stored in `frame->references`.
+3.  Each referenced `snek_object_t` has its `is_marked` flag set to `true`.
+
+### Trace Phase (`trace`, `trace_blacken_object`, `trace_mark_object` functions)
+
+The `trace(vm_t *vm)` function performs a graph traversal, starting from the marked root objects, to discover and mark all other objects reachable through references. This ensures that objects indirectly referenced (e.g., an object within a marked array) are also considered alive.
+
+1.  A temporary `gray_objects` stack is initialized.
+2.  All `snek_object_t` instances that were marked in the `mark` phase are pushed onto the `gray_objects` stack.
+3.  While `gray_objects` is not empty, an object is popped and processed by `trace_blacken_object`.
+    -   `trace_blacken_object` examines the `kind` of the object:
+        -   For `VECTOR3` objects, it recursively calls `trace_mark_object` on its `x`, `y`, and `z` components.
+        -   For `ARRAY` objects, it iterates through `obj->data.v_array.elements` and recursively calls `trace_mark_object` on each element.
+        -   `INTEGER`, `FLOAT`, and `STRING` objects are considered leaf nodes and have no further references to trace.
+    -   `trace_mark_object` marks the object (`obj->is_marked = true`) if it hasn't been marked already and pushes it onto the `gray_objects` stack for further tracing.
+
+### Sweep Phase (`sweep` function)
+
+The `sweep(vm_t *vm)` function is responsible for deallocating all objects that were *not* marked during the mark and trace phases, as these are considered garbage.
+
+1.  It iterates through the `vm->objects` stack in reverse order (from `count - 1` down to `0`). This reverse iteration is crucial for safe removal of elements from a dynamic array without affecting the iteration of remaining elements.
+2.  For each `snek_object_t`:
+    -   If `obj->is_marked` is `false` (meaning the object is garbage and not reachable), `snek_object_free(obj)` is called to deallocate its memory, and the corresponding pointer in `vm->objects->data[i]` is set to `NULL`.
+    -   If `obj->is_marked` is `true` (meaning the object is reachable), its `is_marked` flag is reset to `false` in preparation for the next garbage collection cycle.
+3.  Finally, `stack_remove_nulls(vm->objects)` is called to compact the `vm->objects` stack, removing all `NULL` entries (which correspond to the freed objects).
+
+### Object Tracking (`vm_track_object`)
+
+New `snek_object_t` instances, created by functions like `new_snek_integer`, are registered with the VM's garbage collector through `vm_track_object(vm_t *vm, snek_object_t *obj)`. This function simply pushes the new object onto the `vm->objects` stack, ensuring it is part of the pool considered by the garbage collector.
+
+### Object Deallocation (`snek_object_free`)
+
+The `snek_object_free(snek_object_t *obj)` function handles the specific deallocation logic for different `snek_object_kind_t` types. For example, it frees the `char *v_string` for `STRING` objects and `snek_object_t **elements` for `ARRAY` objects, before finally freeing the `snek_object_t` itself.

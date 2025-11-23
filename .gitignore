@@ -1,6 +1,5 @@
 # Build artifacts
 build/
-_deps/
 bin/
 *.o
 *.d

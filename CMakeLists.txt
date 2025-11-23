@@ -18,6 +18,7 @@ add_executable(memory_management_tutorial
     src/sneknew.c
     src/vm.c
     src/myStack.c
+    src/snekobject.c
 )
 
 target_include_directories(memory_management_tutorial PRIVATE

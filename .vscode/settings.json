@@ -28,6 +28,7 @@
     "hash_map": "c",
     "hash_set": "c",
     "mystack.h": "c",
-    "snekobject.h": "c"
+    "snekobject.h": "c",
+    "*.inc": "c"
   }
 }
